@@ -2,7 +2,9 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import User from "../model/user";
 import { validationResult } from "express-validator";
-
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config({ path: `config.env` });
 const authController = {
   signup: async (req: Request, res: Response) => {
     const name: string = req.body.name;
@@ -54,9 +56,25 @@ const authController = {
       const match = await bcrypt.compare(password, user.password);
       if (match) {
         req.session.logged = true;
-        req.session.user = user;
+        req.session.user = {
+          id: user._id.toString(),
+          role: user.role,
+          email: user.email,
+        };
+        const secret: string = process.env.JWT_SECRET!;
+        const exp: string = process.env.JWT_EXPIRY!;
+        const token: string = jwt.sign(
+          {
+            email: email,
+            id: user._id.toString(),
+          },
+          secret,
+          { expiresIn: exp }
+        );
         return res.status(200).json({
           message: "Logged In sucessfully",
+          token: token,
+          id: user._id.toString(),
         });
       }
       return res.status(401).json({

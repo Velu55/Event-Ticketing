@@ -1,5 +1,6 @@
 import express from "express";
 import authRouter from "./routes/auth";
+import adminRouter from "./routes/admin";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import session from "express-session";
@@ -24,6 +25,7 @@ app.use(
 );
 app.use(express.json());
 app.use(authRouter);
+app.use(adminRouter);
 
 mongoose
   .connect(dburl)

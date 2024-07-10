@@ -4,6 +4,10 @@ import session from "express-session";
 declare module "express-session" {
   export interface SessionData {
     logged: boolean;
-    user: object;
+    user: {
+      id: string;
+      role: string;
+      email: string;
+    };
   }
 }

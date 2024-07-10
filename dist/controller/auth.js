@@ -15,6 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_1 = __importDefault(require("../model/user"));
 const express_validator_1 = require("express-validator");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config({ path: `config.env` });
 const authController = {
     signup: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const name = req.body.name;
@@ -68,8 +71,16 @@ const authController = {
             if (match) {
                 req.session.logged = true;
                 req.session.user = user;
+                const secret = process.env.JWT_SECRET;
+                const exp = process.env.JWT_EXPIRY;
+                const token = jsonwebtoken_1.default.sign({
+                    email: email,
+                    id: user._id.toString(),
+                }, secret, { expiresIn: exp });
                 return res.status(200).json({
                     message: "Logged In sucessfully",
+                    token: token,
+                    id: user._id.toString(),
                 });
             }
             return res.status(401).json({
