@@ -5,6 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const auth_1 = __importDefault(require("./routes/auth"));
+const admin_1 = __importDefault(require("./routes/admin"));
+const user_1 = __importDefault(require("./routes/user"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const express_session_1 = __importDefault(require("express-session"));
@@ -26,6 +28,8 @@ app.use((0, express_session_1.default)({
 }));
 app.use(express_1.default.json());
 app.use(auth_1.default);
+app.use(admin_1.default);
+app.use(user_1.default);
 mongoose_1.default
     .connect(dburl)
     .then((result) => {

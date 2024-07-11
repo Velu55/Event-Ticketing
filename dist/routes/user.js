@@ -4,9 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const auth_1 = __importDefault(require("../controller/auth"));
-const schema_1 = require("../validation-schema/schema");
+const user_1 = __importDefault(require("../controller/user"));
 const router = (0, express_1.Router)();
-router.put("/signup", schema_1.signupSchema, auth_1.default.signup);
-router.post("/login", schema_1.loginSchema, auth_1.default.login);
+const is_auth_1 = __importDefault(require("../middleware/is-auth"));
+router.post("/getall-event", is_auth_1.default, user_1.default.getAllEvent);
+router.get("/get-event/:id", is_auth_1.default, user_1.default.getEvent);
 exports.default = router;

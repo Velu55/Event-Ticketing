@@ -23,7 +23,6 @@ const authController = {
         const name = req.body.name;
         const email = req.body.email;
         const password = req.body.password;
-        const role = req.body.role;
         const error = (0, express_validator_1.validationResult)(req);
         if (!error.isEmpty()) {
             return res.status(422).json({
@@ -37,7 +36,7 @@ const authController = {
                 name: name,
                 email: email,
                 password: haspass,
-                role: role,
+                role: "user",
             });
             const result = yield user.save();
             res.status(200).json({
@@ -70,7 +69,11 @@ const authController = {
             const match = yield bcrypt_1.default.compare(password, user.password);
             if (match) {
                 req.session.logged = true;
-                req.session.user = user;
+                req.session.user = {
+                    id: user._id.toString(),
+                    role: user.role,
+                    email: user.email,
+                };
                 const secret = process.env.JWT_SECRET;
                 const exp = process.env.JWT_EXPIRY;
                 const token = jsonwebtoken_1.default.sign({
