@@ -1,6 +1,6 @@
 import { Router } from "express";
 import adminController from "../controller/admin";
-import { eventSchema } from "../validation-schema/schema";
+import { eventSchema, roleSchema } from "../validation-schema/schema";
 import isAuth from "../middleware/is-auth";
 import isAdmin from "../middleware/is-admin";
 const router = Router();
@@ -27,4 +27,11 @@ router.delete(
   adminController.deleteEvent
 );
 
+router.post(
+  "/role-change",
+  roleSchema,
+  isAuth,
+  isAdmin,
+  adminController.roleChnage
+);
 export default router;

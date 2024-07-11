@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import Event from "../model/event";
+import User from "../model/user";
 
 const adminController = {
   newEvent: async (req: Request, res: Response) => {
@@ -98,7 +99,30 @@ const adminController = {
       const result = await Event.findByIdAndDelete(event_id);
       return res.status(200).json({
         message: "Event Deleted..!",
-        result: result,
+        data: result,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: "Event not Deleted..!",
+        error: error,
+      });
+    }
+  },
+  roleChnage: async (req: Request, res: Response) => {
+    try {
+      const email: string = req.body.email;
+      const role: string = req.body.role;
+      const user = await User.findOne({ email: email });
+      if (!user) {
+        return res.status(404).json({
+          message: "User Not Found..!",
+        });
+      }
+      user.role = role;
+      const result = await user.save();
+      return res.status(200).json({
+        message: "User Role Changed..!",
+        data: result,
       });
     } catch (error) {
       return res.status(500).json({

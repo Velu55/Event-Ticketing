@@ -10,7 +10,6 @@ const authController = {
     const name: string = req.body.name;
     const email: string = req.body.email;
     const password: string = req.body.password;
-    const role: string = req.body.role;
     const error = validationResult(req);
     if (!error.isEmpty()) {
       return res.status(422).json({
@@ -24,7 +23,7 @@ const authController = {
         name: name,
         email: email,
         password: haspass,
-        role: role,
+        role: "user",
       });
       const result = await user.save();
       res.status(200).json({

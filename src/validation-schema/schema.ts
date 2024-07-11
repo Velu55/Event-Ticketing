@@ -77,3 +77,16 @@ export const eventSchema = [
     .withMessage("Please enter total number of ticket..!"),
   body("category").notEmpty().trim().withMessage("Please enter category..!"),
 ];
+export const roleSchema = [
+  body("email")
+    .isEmail()
+    .notEmpty()
+    .withMessage("Please Enter Valid Email..!")
+    .trim()
+    .normalizeEmail(),
+  body("role")
+    .notEmpty()
+    .isLength({ min: 4 })
+    .trim()
+    .withMessage("Please Enter Valid Role..!"),
+];
