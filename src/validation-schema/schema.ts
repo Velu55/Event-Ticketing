@@ -34,9 +34,8 @@ export const signupSchema = [
 export const loginSchema = [
   body("email")
     .isEmail()
-    .notEmpty()
     .withMessage("Please Enter Valid Email..!")
-    .trim()
+    .notEmpty()
     .normalizeEmail(),
   body("password", "Please Enter atleast 5 character")
     .notEmpty()
@@ -78,15 +77,67 @@ export const eventSchema = [
   body("category").notEmpty().trim().withMessage("Please enter category..!"),
 ];
 export const roleSchema = [
-  body("email")
+  body("email", "Please Enter Valid Email..!")
     .isEmail()
     .notEmpty()
-    .withMessage("Please Enter Valid Email..!")
     .trim()
     .normalizeEmail(),
-  body("role")
+  body("role", "Please Enter Valid Role..!")
     .notEmpty()
     .isLength({ min: 4 })
-    .trim()
-    .withMessage("Please Enter Valid Role..!"),
+    .trim(),
+];
+export const cartUpdateSchema = [
+  body("cart_id", "Please Enter Valid Cart ID (24 Characters)..!")
+    .notEmpty()
+    .isLength({ min: 24, max: 24 })
+    .isAlphanumeric()
+    .trim(),
+  body("event_id", "Please Enter Valid Event ID (24 Characters)..!")
+    .notEmpty()
+    .isLength({ min: 24, max: 24 })
+    .isAlphanumeric()
+    .trim(),
+  body("quantity", "Please Enter Quantity..!").notEmpty().isNumeric(),
+];
+
+export const cartdeleteSchema = [
+  body("cart_id", "Please Enter Valid Cart ID (24 Characters)..!")
+    .notEmpty()
+    .isLength({ min: 24, max: 24 })
+    .isAlphanumeric(),
+  body("event_id", "Please Enter Valid Event ID (24 Characters)..!")
+    .notEmpty()
+    .isLength({ min: 24, max: 24 })
+    .isAlphanumeric(),
+];
+
+export const saveCartSchema = [
+  body("items").custom((value) => {
+    if (!Array.isArray(value)) {
+      throw new Error("Items must be an array");
+    }
+    for (const item of value) {
+      if (
+        item.eventId == undefined ||
+        item.quantity == undefined ||
+        item.price == undefined
+      ) {
+        throw new Error(
+          "Each item must have properties: eventId, quantity, price"
+        );
+      }
+      console.log(typeof item.eventId);
+      console.log(typeof item.quantity);
+      console.log(typeof item.price);
+      if (
+        typeof item.eventId != "string" ||
+        typeof item.quantity != "number" ||
+        typeof item.price != "number"
+      ) {
+        throw new Error("Invalid data type for eventId, quantity, or price");
+      }
+    }
+    return true;
+  }),
 ];
