@@ -127,9 +127,6 @@ export const saveCartSchema = [
           "Each item must have properties: eventId, quantity, price"
         );
       }
-      console.log(typeof item.eventId);
-      console.log(typeof item.quantity);
-      console.log(typeof item.price);
       if (
         typeof item.eventId != "string" ||
         typeof item.quantity != "number" ||
@@ -140,4 +137,12 @@ export const saveCartSchema = [
     }
     return true;
   }),
+];
+export const orderSchema = [
+  body("status", "Please Enter Order Status..!").notEmpty(),
+  body("method", "Please Enter Payment Method..!").notEmpty(),
+  body("cart_id", "Please Enter Valid Cart ID (24 Characters)..!")
+    .notEmpty()
+    .isLength({ min: 24, max: 24 })
+    .isAlphanumeric(),
 ];
