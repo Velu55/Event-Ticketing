@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveCartSchema = exports.cartdeleteSchema = exports.cartUpdateSchema = exports.roleSchema = exports.eventSchema = exports.loginSchema = exports.signupSchema = void 0;
+exports.orderSchema = exports.saveCartSchema = exports.cartdeleteSchema = exports.cartUpdateSchema = exports.roleSchema = exports.eventSchema = exports.loginSchema = exports.signupSchema = void 0;
 const user_1 = __importDefault(require("../model/user"));
 const express_validator_1 = require("express-validator");
 exports.signupSchema = [
@@ -124,9 +124,6 @@ exports.saveCartSchema = [
                 item.price == undefined) {
                 throw new Error("Each item must have properties: eventId, quantity, price");
             }
-            console.log(typeof item.eventId);
-            console.log(typeof item.quantity);
-            console.log(typeof item.price);
             if (typeof item.eventId != "string" ||
                 typeof item.quantity != "number" ||
                 typeof item.price != "number") {
@@ -135,4 +132,12 @@ exports.saveCartSchema = [
         }
         return true;
     }),
+];
+exports.orderSchema = [
+    (0, express_validator_1.body)("status", "Please Enter Order Status..!").notEmpty(),
+    (0, express_validator_1.body)("method", "Please Enter Payment Method..!").notEmpty(),
+    (0, express_validator_1.body)("cart_id", "Please Enter Valid Cart ID (24 Characters)..!")
+        .notEmpty()
+        .isLength({ min: 24, max: 24 })
+        .isAlphanumeric(),
 ];
