@@ -16,4 +16,5 @@ router.post("/cart-update", is_auth_1.default, schema_1.cartUpdateSchema, user_1
 router.delete("/cart-delete", is_auth_1.default, schema_1.cartdeleteSchema, user_1.default.deleteCart);
 router.put("/order-save", is_auth_1.default, schema_1.orderSchema, user_1.default.putOrder);
 router.get("/order-details/:id", is_auth_1.default, user_1.default.getOrder);
+router.post("/order-cancel", is_auth_1.default, schema_1.orderCancelSchema, user_1.default.cancelOrder);
 exports.default = router;

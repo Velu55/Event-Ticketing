@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.orderSchema = exports.saveCartSchema = exports.cartdeleteSchema = exports.cartUpdateSchema = exports.roleSchema = exports.eventSchema = exports.loginSchema = exports.signupSchema = void 0;
+exports.orderCancelSchema = exports.orderSchema = exports.saveCartSchema = exports.cartdeleteSchema = exports.cartUpdateSchema = exports.roleSchema = exports.eventSchema = exports.loginSchema = exports.signupSchema = void 0;
 const user_1 = __importDefault(require("../model/user"));
 const express_validator_1 = require("express-validator");
 exports.signupSchema = [
@@ -33,7 +33,7 @@ exports.signupSchema = [
         }
         return true;
     }),
-    (0, express_validator_1.body)("role", "Please enter Role...!").notEmpty().trim(),
+    // body("role", "Please enter Role...!").notEmpty().trim(),
 ];
 exports.loginSchema = [
     (0, express_validator_1.body)("email")
@@ -137,6 +137,12 @@ exports.orderSchema = [
     (0, express_validator_1.body)("status", "Please Enter Order Status..!").notEmpty(),
     (0, express_validator_1.body)("method", "Please Enter Payment Method..!").notEmpty(),
     (0, express_validator_1.body)("cart_id", "Please Enter Valid Cart ID (24 Characters)..!")
+        .notEmpty()
+        .isLength({ min: 24, max: 24 })
+        .isAlphanumeric(),
+];
+exports.orderCancelSchema = [
+    (0, express_validator_1.body)("order_id", "Please Enter Valid Cart ID (24 Characters)..!")
         .notEmpty()
         .isLength({ min: 24, max: 24 })
         .isAlphanumeric(),

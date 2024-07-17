@@ -7,6 +7,7 @@ declare module "express-session" {
     logged: boolean;
     user: {
       id: ObjectId;
+      name: string;
       role: string;
       email: string;
     };

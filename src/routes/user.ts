@@ -6,6 +6,7 @@ import {
   cartdeleteSchema,
   saveCartSchema,
   orderSchema,
+  orderCancelSchema,
 } from "../validation-schema/schema";
 const router = Router();
 
@@ -28,4 +29,10 @@ router.delete(
 
 router.put("/order-save", isAuth, orderSchema, userController.putOrder);
 router.get("/order-details/:id", isAuth, userController.getOrder);
+router.post(
+  "/order-cancel",
+  isAuth,
+  orderCancelSchema,
+  userController.cancelOrder
+);
 export default router;

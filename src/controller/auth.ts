@@ -56,6 +56,7 @@ const authController = {
       if (match) {
         req.session.logged = true;
         req.session.user = {
+          name: user.name,
           id: user._id,
           role: user.role,
           email: user.email,

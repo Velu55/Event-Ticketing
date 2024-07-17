@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { toDataURL } from "qrcode";
 import { validationResult } from "express-validator";
+import nodemailer from "nodemailer";
+// import sendgrid from "nodemailer-sendgrid-transport";
 import Event from "../model/event";
 import Cart from "../model/cart";
 import Order from "../model/order";
@@ -243,6 +245,140 @@ const userController = {
       }
       await event?.save();
       await Cart.findByIdAndDelete(cartId);
+      const eventData =
+        result._id +
+        ", " +
+        event?.eventName +
+        ", " +
+        event?.venue +
+        ", " +
+        result.items[0].quantity +
+        ", " +
+        event?.startDate.toLocaleDateString() +
+        " " +
+        event?.startDate.toLocaleTimeString();
+      console.log(eventData);
+      let qrCode = await toDataURL(JSON.stringify(eventData));
+      qrCode = qrCode.replace(/\\/g, "");
+      const mailOptions = {
+        from: "velu32351@gmail.com",
+        to: req.session.user?.email,
+        subject: "Order Placed Successfully",
+        html:
+          `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Details Email with QR Code</title>
+    <style>
+        /* Inline CSS for email styling */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333333;
+            font-size: 24px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        .event-details {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .event-details td, .event-details th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        .qr-code {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Event Details</h1>
+        <p>Hello ` +
+          req.session.user?.name +
+          `,</p>
+        <p>We are excited to invite you to the following event:</p>
+        <table class="event-details">
+            <tr>
+                <th>Event Name</th>
+                <td>` +
+          event?.eventName +
+          `</td>
+            </tr>
+            <tr>
+                <th>Venue</th>
+                <td>` +
+          event?.venue +
+          `</td>
+            </tr>
+            <tr>
+                <th>Start Date & Time</th>
+                <td>` +
+          event?.startDate.toLocaleDateString() +
+          " " +
+          event?.startDate.toLocaleTimeString() +
+          `</td>
+            </tr>
+            <tr>
+                <th>Number of Tickets</th>
+                <td>` +
+          items[0].quantity +
+          `</td>
+            </tr>
+            <tr>
+                <th>Total Ticket Price </th>
+                <td>$` +
+          items[0].quantity * items[0].price +
+          `</td>
+            </tr>
+        </table>
+        <div class="qr-code">
+           <img src="${qrCode}" alt="Event QR Code">
+        </div>
+        <p>Please scan the QR code above for more details and to confirm your attendance.</p>
+        <p>Thank you and we look forward to seeing you at the event!</p>`,
+        envelope: {
+          from: "Order Placed <velu32351@gmail.com>",
+          to: req.session.user?.email,
+        },
+      };
+      //Send the email
+      const transport = nodemailer.createTransport({
+        host: "smtp-relay.brevo.com",
+        port: 587,
+        secure: false, // upgrade later with STARTTLS
+        auth: {
+          user: "7677d3001@smtp-brevo.com",
+          pass: "sgc0AVUTW8rZ6Qha",
+        },
+      });
+      transport.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log("Error:", error);
+        } else {
+          console.log("Email sent:", info.response);
+        }
+      });
       return res.status(200).json({
         message: "Order Placed Sucessfully...!",
         orderId: result._id,
@@ -278,7 +414,8 @@ const userController = {
         " " +
         event?.startDate.toLocaleTimeString();
       console.log(eventData);
-      const qrCode = await toDataURL(JSON.stringify(eventData));
+      let qrCode = await toDataURL(JSON.stringify(eventData));
+      qrCode = qrCode.replace(/\\/g, "");
       return res.status(200).json({
         message: "Order Fetched Sucessfully...!",
         data: result,
@@ -288,6 +425,35 @@ const userController = {
       console.log(error);
       return res.status(500).json({
         message: "Unable to Place Order..!",
+        error: error,
+      });
+    }
+  },
+  cancelOrder: async (req: Request, res: Response) => {
+    const orderId = req.body.order_id;
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+      return res.status(422).json({
+        message: "Validation Errors",
+        Error: error.array(),
+      });
+    }
+    try {
+      const order = await Order.findById(orderId);
+      if (!order) {
+        return res.status(404).json({
+          message: "Order Not Found...!",
+        });
+      }
+      order.orderStatus = "Canceled";
+      await order.save();
+      return res.status(200).json({
+        message: "Order Canceled Sucessfully...!",
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: "Unable to Cancel the  Order..!",
         error: error,
       });
     }

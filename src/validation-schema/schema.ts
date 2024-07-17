@@ -28,7 +28,7 @@ export const signupSchema = [
       }
       return true;
     }),
-  body("role", "Please enter Role...!").notEmpty().trim(),
+  // body("role", "Please enter Role...!").notEmpty().trim(),
 ];
 
 export const loginSchema = [
@@ -142,6 +142,13 @@ export const orderSchema = [
   body("status", "Please Enter Order Status..!").notEmpty(),
   body("method", "Please Enter Payment Method..!").notEmpty(),
   body("cart_id", "Please Enter Valid Cart ID (24 Characters)..!")
+    .notEmpty()
+    .isLength({ min: 24, max: 24 })
+    .isAlphanumeric(),
+];
+
+export const orderCancelSchema = [
+  body("order_id", "Please Enter Valid Cart ID (24 Characters)..!")
     .notEmpty()
     .isLength({ min: 24, max: 24 })
     .isAlphanumeric(),
