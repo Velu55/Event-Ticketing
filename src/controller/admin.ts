@@ -1,6 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { validationResult } from "express-validator";
-import { BadRequests } from "../errors/BadRequestError";
 import { NotFound } from "../errors/NotFound";
 import { HTTP_STATUS_CODES } from "../errors/custom-error";
 import Event from "../model/event";
@@ -9,14 +7,6 @@ import User from "../model/user";
 const adminController = {
   newEvent: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const error = validationResult(req);
-      if (!error.isEmpty()) {
-        throw new BadRequests(
-          "Validation Error",
-          HTTP_STATUS_CODES.BAD_REQUEST,
-          error
-        );
-      }
       const eventName: string = req.body.event_name;
       const description: string = req.body.description;
       const venue: string = req.body.venue;
@@ -39,7 +29,7 @@ const adminController = {
       return res.status(200).json({
         success: true,
         message: "Event Saved Sucessfully..!",
-        data: JSON.stringify(result),
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -47,14 +37,6 @@ const adminController = {
   },
   updateEvent: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const error = validationResult(req);
-      if (!error.isEmpty()) {
-        throw new BadRequests(
-          "Validation Error",
-          HTTP_STATUS_CODES.BAD_REQUEST,
-          error
-        );
-      }
       const event_id: string = req.body.event_id;
       const event = await Event.findById(event_id);
       if (!event) {
@@ -84,7 +66,7 @@ const adminController = {
       return res.status(200).json({
         success: true,
         message: "Event Found..!",
-        data: JSON.stringify(result),
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -105,7 +87,7 @@ const adminController = {
       return res.status(200).json({
         success: true,
         message: "Event Deleted..!",
-        data: JSON.stringify(result),
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -128,7 +110,7 @@ const adminController = {
       return res.status(200).json({
         success: true,
         message: "User Role Changed..!",
-        data: JSON.stringify(result),
+        data: result,
       });
     } catch (error) {
       next(error);

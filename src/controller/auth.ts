@@ -1,9 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import User from "../model/user";
-import { validationResult } from "express-validator";
 import { HTTP_STATUS_CODES } from "../errors/custom-error";
-import { BadRequests } from "../errors/BadRequestError";
 import { NotFound } from "../errors/NotFound";
 import { Unauth } from "../errors/Unauthendicate";
 
@@ -16,14 +14,6 @@ const authController = {
       const name: string = req.body.name;
       const email: string = req.body.email;
       const password: string = req.body.password;
-      const error = validationResult(req);
-      if (!error.isEmpty()) {
-        throw new BadRequests(
-          "Validation Error",
-          HTTP_STATUS_CODES.BAD_REQUEST,
-          error
-        );
-      }
       const haspass = await bcrypt.hash(password, 12);
       const user = new User({
         name: name,
@@ -46,14 +36,6 @@ const authController = {
     try {
       const email: string = req.body.email;
       const password: string = req.body.password;
-      const error = validationResult(req);
-      if (!error.isEmpty()) {
-        throw new BadRequests(
-          "Validation Error",
-          HTTP_STATUS_CODES.BAD_REQUEST,
-          error
-        );
-      }
       const user = await User.findOne({ email: email });
       if (!user) {
         throw new NotFound(

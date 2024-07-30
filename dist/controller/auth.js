@@ -14,23 +14,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const user_1 = __importDefault(require("../model/user"));
-const express_validator_1 = require("express-validator");
+const custom_error_1 = require("../errors/custom-error");
+const NotFound_1 = require("../errors/NotFound");
+const Unauthendicate_1 = require("../errors/Unauthendicate");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config({ path: `config.env` });
 const authController = {
     signup: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const name = req.body.name;
-        const email = req.body.email;
-        const password = req.body.password;
-        const error = (0, express_validator_1.validationResult)(req);
-        if (!error.isEmpty()) {
-            return res.status(422).json({
-                message: "Validation Errors",
-                Error: error.array(),
-            });
-        }
         try {
+            const name = req.body.name;
+            const email = req.body.email;
+            const password = req.body.password;
             const haspass = yield bcrypt_1.default.hash(password, 12);
             const user = new user_1.default({
                 name: name,
@@ -40,7 +35,9 @@ const authController = {
             });
             const result = yield user.save();
             res.status(200).json({
+                success: true,
                 message: "User Creaetd",
+                data: {},
                 id: result._id,
             });
         }
@@ -49,19 +46,12 @@ const authController = {
         }
     }),
     login: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const email = req.body.email;
-        const password = req.body.password;
-        const error = (0, express_validator_1.validationResult)(req);
-        if (!error.isEmpty()) {
-            return res.status(422).json({
-                message: "Validation Errors",
-                Error: error.array(),
-            });
-        }
         try {
+            const email = req.body.email;
+            const password = req.body.password;
             const user = yield user_1.default.findOne({ email: email });
             if (!user) {
-                throw new Error("User Not Found...!");
+                throw new NotFound_1.NotFound("User Not Found..!", custom_error_1.HTTP_STATUS_CODES.NOT_FOUND, []);
             }
             const match = yield bcrypt_1.default.compare(password, user.password);
             if (match) {
@@ -79,14 +69,14 @@ const authController = {
                     id: user._id.toString(),
                 }, secret, { expiresIn: exp });
                 return res.status(200).json({
+                    success: true,
                     message: "Logged In sucessfully",
+                    data: {},
                     token: token,
                     id: user._id.toString(),
                 });
             }
-            return res.status(401).json({
-                message: "Invalid Email or Password",
-            });
+            throw new Unauthendicate_1.Unauth("Invalid Email or Password...!", custom_error_1.HTTP_STATUS_CODES.UNAUTHORIZED);
         }
         catch (error) {
             next(error);

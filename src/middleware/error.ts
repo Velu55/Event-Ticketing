@@ -12,7 +12,7 @@ export const errorHandler = (
       success: false,
       message: message,
       error_code: statusCode,
-      data: JSON.stringify(error),
+      data: error,
     });
   }
 

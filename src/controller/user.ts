@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { toDataURL } from "qrcode";
-import { validationResult } from "express-validator";
 import { createTransport } from "nodemailer";
-import { BadRequests } from "../errors/BadRequestError";
 import { NotFound } from "../errors/NotFound";
 import { Forbidden } from "../errors/Forbidden";
 import { HTTP_STATUS_CODES } from "../errors/custom-error";
@@ -37,7 +35,7 @@ const userController = {
       return res.status(200).json({
         success: true,
         message: "Events Found..!",
-        data: JSON.stringify(event),
+        data: event,
       });
     } catch (error) {
       next(error);
@@ -57,7 +55,7 @@ const userController = {
       return res.status(200).json({
         success: true,
         message: "Event Fetched Sucessfully...!",
-        data: JSON.stringify(event),
+        data: event,
       });
     } catch (error) {
       next(error);
@@ -77,7 +75,7 @@ const userController = {
       return res.status(200).json({
         success: true,
         message: "Cart Fetched Sucessfully...!",
-        data: JSON.stringify(cart),
+        data: cart,
       });
     } catch (error) {
       next(error);
@@ -85,14 +83,6 @@ const userController = {
   },
   postCart: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const error = validationResult(req);
-      if (!error.isEmpty()) {
-        throw new BadRequests(
-          "Validation Error",
-          HTTP_STATUS_CODES.BAD_REQUEST,
-          error
-        );
-      }
       const items = req.body.items;
       const event = await Event.findById(items[0].eventId);
       if (!event) {
@@ -126,14 +116,6 @@ const userController = {
   },
   updateCart: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const error = validationResult(req);
-      if (!error.isEmpty()) {
-        throw new BadRequests(
-          "Validation Error",
-          HTTP_STATUS_CODES.BAD_REQUEST,
-          error
-        );
-      }
       const cartId = req.body.cart_id;
       const eventId = req.body.event_id;
       const quantity = req.body.quantity;
@@ -169,7 +151,7 @@ const userController = {
         return res.status(200).json({
           success: true,
           message: "Item Updated Sucessfully...!",
-          data: JSON.stringify(result),
+          data: result,
         });
       }
     } catch (error) {
@@ -178,14 +160,6 @@ const userController = {
   },
   deleteCart: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const error = validationResult(req);
-      if (!error.isEmpty()) {
-        throw new BadRequests(
-          "Validation Error",
-          HTTP_STATUS_CODES.BAD_REQUEST,
-          error
-        );
-      }
       const cartId = req.body.cart_id;
       const eventId = req.body.event_id;
       const cart = await Cart.findById(cartId);
@@ -205,7 +179,7 @@ const userController = {
         return res.status(200).json({
           success: true,
           message: "Item Deleted Sucessfully...!",
-          data: JSON.stringify(result),
+          data: result,
         });
       } else {
         throw new NotFound(
@@ -219,14 +193,6 @@ const userController = {
     }
   },
   putOrder: async (req: Request, res: Response, next: NextFunction) => {
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-      throw new BadRequests(
-        "Validation Error",
-        HTTP_STATUS_CODES.BAD_REQUEST,
-        error
-      );
-    }
     try {
       const status = req.body.status;
       const method = req.body.method;
@@ -432,7 +398,7 @@ const userController = {
       return res.status(200).json({
         success: true,
         message: "Order Fetched Sucessfully...!",
-        data: JSON.stringify(result),
+        data: result,
         qrcode: `<img src="${qrCode}" alt="Event QR Code">`,
       });
     } catch (error) {
@@ -441,22 +407,13 @@ const userController = {
   },
   cancelOrder: async (req: Request, res: Response, next: NextFunction) => {
     const orderId = req.body.order_id;
-    const error = validationResult(req);
-
     try {
-      if (!error.isEmpty()) {
-        throw new BadRequests(
-          "Validation Error",
-          HTTP_STATUS_CODES.BAD_REQUEST,
-          error
-        );
-      }
       const order = await Order.findById(orderId);
       if (!order) {
         throw new NotFound(
           "Order Not Found...!",
           HTTP_STATUS_CODES.NOT_FOUND,
-          error
+          []
         );
       }
       order.orderStatus = "Canceled";

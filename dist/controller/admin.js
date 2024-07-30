@@ -12,18 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_validator_1 = require("express-validator");
+const NotFound_1 = require("../errors/NotFound");
+const custom_error_1 = require("../errors/custom-error");
 const event_1 = __importDefault(require("../model/event"));
 const user_1 = __importDefault(require("../model/user"));
 const adminController = {
     newEvent: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const error = (0, express_validator_1.validationResult)(req);
-        if (!error.isEmpty()) {
-            return res.status(422).json({
-                message: "Validation Errors",
-                Error: error.array(),
-            });
-        }
         try {
             const eventName = req.body.event_name;
             const description = req.body.description;
@@ -45,8 +39,9 @@ const adminController = {
             });
             const result = yield event.save();
             return res.status(200).json({
-                message: "event saved sucessfully..!",
-                result: result,
+                success: true,
+                message: "Event Saved Sucessfully..!",
+                data: result,
             });
         }
         catch (error) {
@@ -54,20 +49,11 @@ const adminController = {
         }
     }),
     updateEvent: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const error = (0, express_validator_1.validationResult)(req);
-        if (!error.isEmpty()) {
-            return res.status(422).json({
-                message: "Validation Errors",
-                Error: error.array(),
-            });
-        }
         try {
             const event_id = req.body.event_id;
             const event = yield event_1.default.findById(event_id);
             if (!event) {
-                return res.status(404).json({
-                    message: "event not found..!",
-                });
+                throw new NotFound_1.NotFound("Event Not Found..!", custom_error_1.HTTP_STATUS_CODES.NOT_FOUND, []);
             }
             const eventName = req.body.event_name;
             const description = req.body.description;
@@ -87,8 +73,9 @@ const adminController = {
             event.category = category;
             const result = yield event.save();
             return res.status(200).json({
-                message: "event  found..!",
-                result: result,
+                success: true,
+                message: "Event Found..!",
+                data: result,
             });
         }
         catch (error) {
@@ -100,12 +87,11 @@ const adminController = {
             const event_id = req.params.id;
             const event = yield event_1.default.findById(event_id);
             if (!event) {
-                return res.status(404).json({
-                    message: "Event Not Found..!",
-                });
+                throw new NotFound_1.NotFound("Event Not Found..!", custom_error_1.HTTP_STATUS_CODES.NOT_FOUND, []);
             }
             const result = yield event_1.default.findByIdAndDelete(event_id);
             return res.status(200).json({
+                success: true,
                 message: "Event Deleted..!",
                 data: result,
             });
@@ -120,13 +106,12 @@ const adminController = {
             const role = req.body.role;
             const user = yield user_1.default.findOne({ email: email });
             if (!user) {
-                return res.status(404).json({
-                    message: "User Not Found..!",
-                });
+                throw new NotFound_1.NotFound("User Not Found..!", custom_error_1.HTTP_STATUS_CODES.NOT_FOUND, []);
             }
             user.role = role;
             const result = yield user.save();
             return res.status(200).json({
+                success: true,
                 message: "User Role Changed..!",
                 data: result,
             });

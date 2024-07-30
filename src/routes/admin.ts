@@ -3,6 +3,7 @@ import adminController from "../controller/admin";
 import { eventSchema, roleSchema } from "../validation-schema/schema";
 import isAuth from "../middleware/is-auth";
 import isAdmin from "../middleware/is-admin";
+import validation from "../middleware/vaildation";
 const router = Router();
 
 router.put(
@@ -10,6 +11,7 @@ router.put(
   eventSchema,
   isAuth,
   isAdmin,
+  validation,
   adminController.newEvent
 );
 router.post(
@@ -17,6 +19,7 @@ router.post(
   eventSchema,
   isAuth,
   isAdmin,
+  validation,
   adminController.updateEvent
 );
 
