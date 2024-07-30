@@ -25,10 +25,10 @@ const isAuth = (req, res, next) => {
         next();
     }
     catch (e) {
-        console.log(e);
         return res.status(500).json({
             error: "Invalid Token..!",
         });
     }
 };
 exports.default = isAuth;
+//# sourceMappingURL=is-auth.js.map

@@ -12,3 +12,4 @@ const isAdmin = (req, res, next) => {
     }
 };
 exports.default = isAdmin;
+//# sourceMappingURL=is-admin.js.map

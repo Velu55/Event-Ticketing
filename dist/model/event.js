@@ -40,3 +40,4 @@ const eventSchema = new Schema({
     },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model("Event", eventSchema);
+//# sourceMappingURL=event.js.map

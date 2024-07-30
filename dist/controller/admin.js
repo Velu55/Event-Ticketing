@@ -16,7 +16,7 @@ const express_validator_1 = require("express-validator");
 const event_1 = __importDefault(require("../model/event"));
 const user_1 = __importDefault(require("../model/user"));
 const adminController = {
-    newEvent: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    newEvent: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const error = (0, express_validator_1.validationResult)(req);
         if (!error.isEmpty()) {
             return res.status(422).json({
@@ -50,13 +50,10 @@ const adminController = {
             });
         }
         catch (error) {
-            return res.status(500).json({
-                message: "Event not Creaetd",
-                error: error,
-            });
+            next(error);
         }
     }),
-    updateEvent: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    updateEvent: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const error = (0, express_validator_1.validationResult)(req);
         if (!error.isEmpty()) {
             return res.status(422).json({
@@ -95,13 +92,10 @@ const adminController = {
             });
         }
         catch (error) {
-            return res.status(500).json({
-                message: "Event not Updated..!",
-                error: error,
-            });
+            next(error);
         }
     }),
-    deleteEvent: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    deleteEvent: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const event_id = req.params.id;
             const event = yield event_1.default.findById(event_id);
@@ -117,13 +111,10 @@ const adminController = {
             });
         }
         catch (error) {
-            return res.status(500).json({
-                message: "Event not Deleted..!",
-                error: error,
-            });
+            next(error);
         }
     }),
-    roleChnage: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    roleChnage: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const email = req.body.email;
             const role = req.body.role;
@@ -141,11 +132,9 @@ const adminController = {
             });
         }
         catch (error) {
-            return res.status(500).json({
-                message: "Event not Deleted..!",
-                error: error,
-            });
+            next(error);
         }
     }),
 };
 exports.default = adminController;
+//# sourceMappingURL=admin.js.map

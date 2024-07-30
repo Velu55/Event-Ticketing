@@ -19,7 +19,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config({ path: `config.env` });
 const authController = {
-    signup: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    signup: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const name = req.body.name;
         const email = req.body.email;
         const password = req.body.password;
@@ -44,14 +44,11 @@ const authController = {
                 id: result._id,
             });
         }
-        catch (e) {
-            res.status(500).json({
-                message: "User not Creaetd",
-                error: e,
-            });
+        catch (error) {
+            next(error);
         }
     }),
-    login: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    login: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const email = req.body.email;
         const password = req.body.password;
         const error = (0, express_validator_1.validationResult)(req);
@@ -91,13 +88,10 @@ const authController = {
                 message: "Invalid Email or Password",
             });
         }
-        catch (e) {
-            console.log(e);
-            res.status(500).json({
-                message: "Error In login",
-                error: e,
-            });
+        catch (error) {
+            next(error);
         }
     }),
 };
 exports.default = authController;
+//# sourceMappingURL=auth.js.map

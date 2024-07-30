@@ -4,13 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const auth_1 = __importDefault(require("./routes/auth"));
-const admin_1 = __importDefault(require("./routes/admin"));
-const user_1 = __importDefault(require("./routes/user"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const express_session_1 = __importDefault(require("express-session"));
 const connect_mongodb_session_1 = __importDefault(require("connect-mongodb-session"));
+const auth_1 = __importDefault(require("./routes/auth"));
+const admin_1 = __importDefault(require("./routes/admin"));
+const user_1 = __importDefault(require("./routes/user"));
+// import { errorHandler } from "./middleware/error";
 dotenv_1.default.config({ path: `config.env` });
 const app = (0, express_1.default)();
 const port = +process.env.PORT || 3000;
@@ -30,6 +31,11 @@ app.use(express_1.default.json());
 app.use(auth_1.default);
 app.use(admin_1.default);
 app.use(user_1.default);
+// app.use(errorHandler);
+app.use((err, _req, res) => {
+    console.error(err.stack);
+    res.status(500).send("Something broke!");
+});
 mongoose_1.default
     .connect(dburl)
     .then((result) => {
@@ -41,3 +47,4 @@ mongoose_1.default
 app.listen(port, () => {
     console.log("App listen 3000");
 });
+//# sourceMappingURL=app.js.map

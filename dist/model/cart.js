@@ -30,3 +30,4 @@ const cartSchema = new Schema({
     ],
 }, { timestamps: true });
 exports.default = mongoose_1.default.model("Cart", cartSchema);
+//# sourceMappingURL=cart.js.map

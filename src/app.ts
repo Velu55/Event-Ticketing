@@ -1,11 +1,13 @@
-import express from "express";
-import authRouter from "./routes/auth";
-import adminRouter from "./routes/admin";
-import userRouter from "./routes/user";
+import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import session from "express-session";
 import mongodbstore from "connect-mongodb-session";
+import authRouter from "./routes/auth";
+import adminRouter from "./routes/admin";
+import userRouter from "./routes/user";
+import { errorHandler } from "./middleware/error";
+import { NotFound } from "./errors/NotFound";
 dotenv.config({ path: `config.env` });
 
 const app = express();
@@ -25,9 +27,18 @@ app.use(
   })
 );
 app.use(express.json());
+
 app.use(authRouter);
 app.use(adminRouter);
 app.use(userRouter);
+
+app.use((req: Request, res: Response) => {
+  console.log(req);
+  throw new NotFound("Route Not Found", 404, []);
+  console.log(res);
+});
+app.use(errorHandler);
+
 mongoose
   .connect(dburl)
   .then((result) => {

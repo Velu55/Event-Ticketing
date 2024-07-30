@@ -1,14 +1,17 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { toDataURL } from "qrcode";
 import { validationResult } from "express-validator";
-import nodemailer from "nodemailer";
-// import sendgrid from "nodemailer-sendgrid-transport";
+import { createTransport } from "nodemailer";
+import { BadRequests } from "../errors/BadRequestError";
+import { NotFound } from "../errors/NotFound";
+import { Forbidden } from "../errors/Forbidden";
+import { HTTP_STATUS_CODES } from "../errors/custom-error";
 import Event from "../model/event";
 import Cart from "../model/cart";
 import Order from "../model/order";
 
 const userController = {
-  getAllEvent: async (req: Request, res: Response) => {
+  getAllEvent: async (req: Request, res: Response, next: NextFunction) => {
     try {
       let cat = req.body.cat!;
       let date = req.body.date;
@@ -25,83 +28,83 @@ const userController = {
       };
       const event = await Event.find(filter);
       if (!event) {
-        return res.status(404).json({
-          message: "No Event Found..!",
-        });
+        throw new NotFound(
+          "No Event Found..!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       return res.status(200).json({
         message: "Events Found..!",
         data: event,
       });
     } catch (error) {
-      return res.status(500).json({
-        message: "Unable to fetch Events",
-        error: error,
-      });
+      next(error);
     }
   },
-  getEvent: async (req: Request, res: Response) => {
+  getEvent: async (req: Request, res: Response, next: NextFunction) => {
     const event_id: string = req.params.id;
     try {
       const event = await Event.findById(event_id);
       if (!event) {
-        return res.status(404).json({
-          message: "Event Not Found..!",
-        });
+        throw new NotFound(
+          "Event Not Found..!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       return res.status(200).json({
         message: "Event Fetched Sucessfully...!",
         data: event,
       });
     } catch (error) {
-      return res.status(500).json({
-        message: "Unable to fetch Event",
-        error: error,
-      });
+      next(error);
     }
   },
-  getCart: async (req: Request, res: Response) => {
+  getCart: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.session.user?.id.toString();
       const cart = await Cart.findOne({ userId: userId });
       if (!cart) {
-        return res.status(404).json({
-          message: "Cart Not Found..!",
-        });
+        throw new NotFound(
+          "Cart Not Found..!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       return res.status(200).json({
         message: "Cart Fetched Sucessfully...!",
         data: cart,
       });
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({
-        message: "Unable To Fetch Cart..!",
-        error: error,
-      });
+      next(error);
     }
   },
-  postCart: async (req: Request, res: Response) => {
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-      return res.status(422).json({
-        message: "Validation Errors",
-        Error: error.array(),
-      });
-    }
-    const items = req.body.items;
+  postCart: async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const error = validationResult(req);
+      if (!error.isEmpty()) {
+        throw new BadRequests(
+          "Validation Error",
+          HTTP_STATUS_CODES.BAD_REQUEST,
+          error
+        );
+      }
+      const items = req.body.items;
       const event = await Event.findById(items[0].eventId);
       if (!event) {
-        return res.status(404).json({
-          message: "Event Not Found..!",
-        });
+        throw new NotFound(
+          "Event Not Found..!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       if (items[0].quantity > event?.NumberOfTickets) {
-        return res.status(403).json({
-          message: "Ticket count exceeded maximum limit",
-          available_tickets: event?.NumberOfTickets,
-        });
+        throw new Forbidden(
+          "Ticket count exceeded maximum limit",
+          HTTP_STATUS_CODES.FORBIDDEN,
+          [{ available_tickets: event?.NumberOfTickets }]
+        );
       }
       const cart = new Cart({
         userId: req.session.user?.id,
@@ -113,41 +116,44 @@ const userController = {
         cart_id: result._id,
       });
     } catch (error) {
-      return res.status(500).json({
-        message: "Unable to Save cart",
-        error: error,
-      });
+      next(error);
     }
   },
-  updateCart: async (req: Request, res: Response) => {
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-      return res.status(422).json({
-        message: "Validation Errors",
-        Error: error.array(),
-      });
-    }
+  updateCart: async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const error = validationResult(req);
+      if (!error.isEmpty()) {
+        throw new BadRequests(
+          "Validation Error",
+          HTTP_STATUS_CODES.BAD_REQUEST,
+          error
+        );
+      }
       const cartId = req.body.cart_id;
       const eventId = req.body.event_id;
       const quantity = req.body.quantity;
       const cart = await Cart.findById(cartId);
       if (!cart) {
-        return res.status(404).json({
-          message: "Cart Not Found...!",
-        });
+        throw new NotFound(
+          "Cart Not Found..!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       const event = await Event.findById(eventId);
       if (!event) {
-        return res.status(404).json({
-          message: "The Event Not Found in Cart...!",
-        });
+        throw new NotFound(
+          "The Event Not Found in Cart...!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       if (quantity > event?.NumberOfTickets) {
-        return res.status(403).json({
-          message: "Ticket count exceeded maximum limit",
-          available_tickets: event?.NumberOfTickets,
-        });
+        throw new Forbidden(
+          "Ticket count exceeded maximum limit",
+          HTTP_STATUS_CODES.FORBIDDEN,
+          [{ available_tickets: event?.NumberOfTickets }]
+        );
       }
       const indexToUpdate = cart?.items.findIndex(
         (item) => eventId === item.eventId.toString()
@@ -161,29 +167,28 @@ const userController = {
         });
       }
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({
-        message: "Unable to Update Item",
-        error: error,
-      });
+      next(error);
     }
   },
-  deleteCart: async (req: Request, res: Response) => {
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-      return res.status(422).json({
-        message: "Validation Errors",
-        Error: error.array(),
-      });
-    }
+  deleteCart: async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const error = validationResult(req);
+      if (!error.isEmpty()) {
+        throw new BadRequests(
+          "Validation Error",
+          HTTP_STATUS_CODES.BAD_REQUEST,
+          error
+        );
+      }
       const cartId = req.body.cart_id;
       const eventId = req.body.event_id;
       const cart = await Cart.findById(cartId);
       if (!cart) {
-        return res.status(404).json({
-          message: "Cart Not Found...!",
-        });
+        throw new NotFound(
+          "Cart Not Found...!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       const indexToDelete = cart?.items.findIndex(
         (item) => eventId === item.eventId.toString()
@@ -196,25 +201,24 @@ const userController = {
           data: result,
         });
       } else {
-        return res.status(404).json({
-          message: "The Event Not Found in Cart...!",
-        });
+        throw new NotFound(
+          "The Event Not Found in Cart...!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({
-        message: "Unable to Delete Item",
-        error: error,
-      });
+      next(error);
     }
   },
-  putOrder: async (req: Request, res: Response) => {
+  putOrder: async (req: Request, res: Response, next: NextFunction) => {
     const error = validationResult(req);
     if (!error.isEmpty()) {
-      return res.status(422).json({
-        message: "Validation Errors",
-        Error: error.array(),
-      });
+      throw new BadRequests(
+        "Validation Error",
+        HTTP_STATUS_CODES.BAD_REQUEST,
+        error
+      );
     }
     try {
       const status = req.body.status;
@@ -222,9 +226,11 @@ const userController = {
       const cartId = req.body.cart_id;
       const cart = await Cart.findById(cartId);
       if (!cart) {
-        return res.status(404).json({
-          message: "Cart Not Found...!",
-        });
+        throw new NotFound(
+          "Cart Not Found...!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       const items = cart.items;
       const order = new Order({
@@ -363,7 +369,7 @@ const userController = {
         },
       };
       //Send the email
-      const transport = nodemailer.createTransport({
+      const transport = createTransport({
         host: "smtp-relay.brevo.com",
         port: 587,
         secure: false, // upgrade later with STARTTLS
@@ -384,21 +390,19 @@ const userController = {
         orderId: result._id,
       });
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({
-        message: "Unable to Place Order..!",
-        error: error,
-      });
+      next(error);
     }
   },
-  getOrder: async (req: Request, res: Response) => {
+  getOrder: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orderId = req.params.id;
       const result = await Order.findById(orderId);
       if (!result) {
-        return res.status(404).json({
-          message: "Order Not Found...!",
-        });
+        throw new NotFound(
+          "Order Not Found...!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       const event = await Event.findById(result.items[0].eventId);
       const eventData =
@@ -422,28 +426,28 @@ const userController = {
         qrcode: `<img src="${qrCode}" alt="Event QR Code">`,
       });
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({
-        message: "Unable to Place Order..!",
-        error: error,
-      });
+      next(error);
     }
   },
-  cancelOrder: async (req: Request, res: Response) => {
+  cancelOrder: async (req: Request, res: Response, next: NextFunction) => {
     const orderId = req.body.order_id;
     const error = validationResult(req);
-    if (!error.isEmpty()) {
-      return res.status(422).json({
-        message: "Validation Errors",
-        Error: error.array(),
-      });
-    }
+
     try {
+      if (!error.isEmpty()) {
+        throw new BadRequests(
+          "Validation Error",
+          HTTP_STATUS_CODES.BAD_REQUEST,
+          error
+        );
+      }
       const order = await Order.findById(orderId);
       if (!order) {
-        return res.status(404).json({
-          message: "Order Not Found...!",
-        });
+        throw new NotFound(
+          "Order Not Found...!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          error
+        );
       }
       order.orderStatus = "Canceled";
       await order.save();
@@ -451,11 +455,7 @@ const userController = {
         message: "Order Canceled Sucessfully...!",
       });
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({
-        message: "Unable to Cancel the  Order..!",
-        error: error,
-      });
+      next(error);
     }
   },
 };

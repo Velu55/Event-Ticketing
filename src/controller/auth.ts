@@ -1,23 +1,29 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import User from "../model/user";
 import { validationResult } from "express-validator";
+import { HTTP_STATUS_CODES } from "../errors/custom-error";
+import { BadRequests } from "../errors/BadRequestError";
+import { NotFound } from "../errors/NotFound";
+import { Unauth } from "../errors/Unauthendicate";
+
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config({ path: `config.env` });
 const authController = {
-  signup: async (req: Request, res: Response) => {
-    const name: string = req.body.name;
-    const email: string = req.body.email;
-    const password: string = req.body.password;
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-      return res.status(422).json({
-        message: "Validation Errors",
-        Error: error.array(),
-      });
-    }
+  signup: async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const name: string = req.body.name;
+      const email: string = req.body.email;
+      const password: string = req.body.password;
+      const error = validationResult(req);
+      if (!error.isEmpty()) {
+        throw new BadRequests(
+          "Validation Error",
+          HTTP_STATUS_CODES.BAD_REQUEST,
+          error
+        );
+      }
       const haspass = await bcrypt.hash(password, 12);
       const user = new User({
         name: name,
@@ -30,27 +36,29 @@ const authController = {
         message: "User Creaetd",
         id: result._id,
       });
-    } catch (e) {
-      res.status(500).json({
-        message: "User not Creaetd",
-        error: e,
-      });
+    } catch (error) {
+      next(error);
     }
   },
-  login: async (req: Request, res: Response) => {
-    const email: string = req.body.email;
-    const password: string = req.body.password;
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-      return res.status(422).json({
-        message: "Validation Errors",
-        Error: error.array(),
-      });
-    }
+  login: async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const email: string = req.body.email;
+      const password: string = req.body.password;
+      const error = validationResult(req);
+      if (!error.isEmpty()) {
+        throw new BadRequests(
+          "Validation Error",
+          HTTP_STATUS_CODES.BAD_REQUEST,
+          error
+        );
+      }
       const user = await User.findOne({ email: email });
       if (!user) {
-        throw new Error("User Not Found...!");
+        throw new NotFound(
+          "User Not Found..!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       const match = await bcrypt.compare(password, user.password);
       if (match) {
@@ -77,15 +85,12 @@ const authController = {
           id: user._id.toString(),
         });
       }
-      return res.status(401).json({
-        message: "Invalid Email or Password",
-      });
-    } catch (e) {
-      console.log(e);
-      res.status(500).json({
-        message: "Error In login",
-        error: e,
-      });
+      throw new Unauth(
+        "Invalid Email or Password...!",
+        HTTP_STATUS_CODES.UNAUTHORIZED
+      );
+    } catch (error) {
+      next(error);
     }
   },
 };

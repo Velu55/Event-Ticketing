@@ -14,3 +14,4 @@ router.post("/update-event", schema_1.eventSchema, is_auth_1.default, is_admin_1
 router.delete("/delete-event/:id", is_auth_1.default, is_admin_1.default, admin_1.default.deleteEvent);
 router.post("/role-change", schema_1.roleSchema, is_auth_1.default, is_admin_1.default, admin_1.default.roleChnage);
 exports.default = router;
+//# sourceMappingURL=admin.js.map

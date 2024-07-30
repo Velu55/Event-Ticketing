@@ -14,13 +14,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const qrcode_1 = require("qrcode");
 const express_validator_1 = require("express-validator");
-const nodemailer_1 = __importDefault(require("nodemailer"));
-// import sendgrid from "nodemailer-sendgrid-transport";
+const nodemailer_1 = require("nodemailer");
+const custom_error_1 = require("../errors/custom-error");
 const event_1 = __importDefault(require("../model/event"));
 const cart_1 = __importDefault(require("../model/cart"));
 const order_1 = __importDefault(require("../model/order"));
 const userController = {
-    getAllEvent: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    getAllEvent: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             let cat = req.body.cat;
             let date = req.body.date;
@@ -47,13 +47,10 @@ const userController = {
             });
         }
         catch (error) {
-            return res.status(500).json({
-                message: "Unable to fetch Events",
-                error: error,
-            });
+            next(error);
         }
     }),
-    getEvent: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    getEvent: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const event_id = req.params.id;
         try {
             const event = yield event_1.default.findById(event_id);
@@ -68,13 +65,10 @@ const userController = {
             });
         }
         catch (error) {
-            return res.status(500).json({
-                message: "Unable to fetch Event",
-                error: error,
-            });
+            next(error);
         }
     }),
-    getCart: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    getCart: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         try {
             const userId = (_a = req.session.user) === null || _a === void 0 ? void 0 : _a.id.toString();
@@ -90,14 +84,10 @@ const userController = {
             });
         }
         catch (error) {
-            console.log(error);
-            return res.status(500).json({
-                message: "Unable To Fetch Cart..!",
-                error: error,
-            });
+            next(error);
         }
     }),
-    postCart: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    postCart: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         const error = (0, express_validator_1.validationResult)(req);
         if (!error.isEmpty()) {
@@ -131,13 +121,10 @@ const userController = {
             });
         }
         catch (error) {
-            return res.status(500).json({
-                message: "Unable to Save cart",
-                error: error,
-            });
+            next(error);
         }
     }),
-    updateCart: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    updateCart: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const error = (0, express_validator_1.validationResult)(req);
         if (!error.isEmpty()) {
             return res.status(422).json({
@@ -178,14 +165,10 @@ const userController = {
             }
         }
         catch (error) {
-            console.log(error);
-            return res.status(500).json({
-                message: "Unable to Update Item",
-                error: error,
-            });
+            next(error);
         }
     }),
-    deleteCart: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    deleteCart: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const error = (0, express_validator_1.validationResult)(req);
         if (!error.isEmpty()) {
             return res.status(422).json({
@@ -218,14 +201,10 @@ const userController = {
             }
         }
         catch (error) {
-            console.log(error);
-            return res.status(500).json({
-                message: "Unable to Delete Item",
-                error: error,
-            });
+            next(error);
         }
     }),
-    putOrder: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    putOrder: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b, _c, _d;
         const error = (0, express_validator_1.validationResult)(req);
         if (!error.isEmpty()) {
@@ -377,7 +356,7 @@ const userController = {
                 },
             };
             //Send the email
-            const transport = nodemailer_1.default.createTransport({
+            const transport = (0, nodemailer_1.createTransport)({
                 host: "smtp-relay.brevo.com",
                 port: 587,
                 secure: false, // upgrade later with STARTTLS
@@ -400,14 +379,10 @@ const userController = {
             });
         }
         catch (error) {
-            console.log(error);
-            return res.status(500).json({
-                message: "Unable to Place Order..!",
-                error: error,
-            });
+            next(error);
         }
     }),
-    getOrder: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    getOrder: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const orderId = req.params.id;
             const result = yield order_1.default.findById(orderId);
@@ -438,23 +413,23 @@ const userController = {
             });
         }
         catch (error) {
-            console.log(error);
-            return res.status(500).json({
-                message: "Unable to Place Order..!",
-                error: error,
-            });
+            next(error);
         }
     }),
-    cancelOrder: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    cancelOrder: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const orderId = req.body.order_id;
-        const error = (0, express_validator_1.validationResult)(req);
-        if (!error.isEmpty()) {
-            return res.status(422).json({
-                message: "Validation Errors",
-                Error: error.array(),
-            });
-        }
         try {
+            const error = (0, express_validator_1.validationResult)(req);
+            if (!error.isEmpty()) {
+                // return next(
+                //   new BadRequests(
+                //     "Validation Error",
+                //     HTTP_STATUS_CODES.BAD_REQUEST,
+                //     error
+                //   )
+                // );
+                throw new custom_error_1.CustomError("Validation Error", custom_error_1.HTTP_STATUS_CODES.BAD_REQUEST, error);
+            }
             const order = yield order_1.default.findById(orderId);
             if (!order) {
                 return res.status(404).json({
@@ -468,12 +443,11 @@ const userController = {
             });
         }
         catch (error) {
-            console.log(error);
-            return res.status(500).json({
-                message: "Unable to Cancel the  Order..!",
-                error: error,
-            });
+            console.log("error - ", error);
+            next(error);
+            console.log("error - ");
         }
     }),
 };
 exports.default = userController;
+//# sourceMappingURL=user.js.map

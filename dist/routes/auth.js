@@ -10,3 +10,4 @@ const router = (0, express_1.Router)();
 router.put("/signup", schema_1.signupSchema, auth_1.default.signup);
 router.post("/login", schema_1.loginSchema, auth_1.default.login);
 exports.default = router;
+//# sourceMappingURL=auth.js.map

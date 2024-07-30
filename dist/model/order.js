@@ -47,3 +47,4 @@ const orderSchema = new Schema({
     },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model("Order", orderSchema);
+//# sourceMappingURL=order.js.map

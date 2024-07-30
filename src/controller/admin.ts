@@ -1,18 +1,22 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
+import { BadRequests } from "../errors/BadRequestError";
+import { NotFound } from "../errors/NotFound";
+import { HTTP_STATUS_CODES } from "../errors/custom-error";
 import Event from "../model/event";
 import User from "../model/user";
 
 const adminController = {
-  newEvent: async (req: Request, res: Response) => {
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-      return res.status(422).json({
-        message: "Validation Errors",
-        Error: error.array(),
-      });
-    }
+  newEvent: async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const error = validationResult(req);
+      if (!error.isEmpty()) {
+        throw new BadRequests(
+          "Validation Error",
+          HTTP_STATUS_CODES.BAD_REQUEST,
+          error
+        );
+      }
       const eventName: string = req.body.event_name;
       const description: string = req.body.description;
       const venue: string = req.body.venue;
@@ -37,27 +41,27 @@ const adminController = {
         result: result,
       });
     } catch (error) {
-      return res.status(500).json({
-        message: "Event not Creaetd",
-        error: error,
-      });
+      next(error);
     }
   },
-  updateEvent: async (req: Request, res: Response) => {
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-      return res.status(422).json({
-        message: "Validation Errors",
-        Error: error.array(),
-      });
-    }
+  updateEvent: async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const error = validationResult(req);
+      if (!error.isEmpty()) {
+        throw new BadRequests(
+          "Validation Error",
+          HTTP_STATUS_CODES.BAD_REQUEST,
+          error
+        );
+      }
       const event_id: string = req.body.event_id;
       const event = await Event.findById(event_id);
       if (!event) {
-        return res.status(404).json({
-          message: "event not found..!",
-        });
+        throw new NotFound(
+          "Event Not Found..!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       const eventName: string = req.body.event_name;
       const description: string = req.body.description;
@@ -81,20 +85,19 @@ const adminController = {
         result: result,
       });
     } catch (error) {
-      return res.status(500).json({
-        message: "Event not Updated..!",
-        error: error,
-      });
+      next(error);
     }
   },
-  deleteEvent: async (req: Request, res: Response) => {
+  deleteEvent: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const event_id: string = req.params.id;
       const event = await Event.findById(event_id);
       if (!event) {
-        return res.status(404).json({
-          message: "Event Not Found..!",
-        });
+        throw new NotFound(
+          "Event Not Found..!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       const result = await Event.findByIdAndDelete(event_id);
       return res.status(200).json({
@@ -102,21 +105,20 @@ const adminController = {
         data: result,
       });
     } catch (error) {
-      return res.status(500).json({
-        message: "Event not Deleted..!",
-        error: error,
-      });
+      next(error);
     }
   },
-  roleChnage: async (req: Request, res: Response) => {
+  roleChnage: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const email: string = req.body.email;
       const role: string = req.body.role;
       const user = await User.findOne({ email: email });
       if (!user) {
-        return res.status(404).json({
-          message: "User Not Found..!",
-        });
+        throw new NotFound(
+          "User Not Found..!",
+          HTTP_STATUS_CODES.NOT_FOUND,
+          []
+        );
       }
       user.role = role;
       const result = await user.save();
@@ -125,10 +127,7 @@ const adminController = {
         data: result,
       });
     } catch (error) {
-      return res.status(500).json({
-        message: "Event not Deleted..!",
-        error: error,
-      });
+      next(error);
     }
   },
 };

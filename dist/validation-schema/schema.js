@@ -147,3 +147,4 @@ exports.orderCancelSchema = [
         .isLength({ min: 24, max: 24 })
         .isAlphanumeric(),
 ];
+//# sourceMappingURL=schema.js.map
