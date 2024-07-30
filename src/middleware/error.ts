@@ -9,14 +9,19 @@ export const errorHandler = (
   if (err instanceof CustomError) {
     const { statusCode, message, error } = err;
     return res.status(statusCode).json({
+      success: false,
       message: message,
-      error: error,
+      error_code: statusCode,
+      data: JSON.stringify(error),
     });
   }
 
   // Unhandled errors
-  return res
-    .status(500)
-    .send({ errors: [{ message: "Something went wrong" }] });
+  return res.status(500).send({
+    success: false,
+    message: "Something went wrong",
+    error_code: 500,
+    data: {},
+  });
   console.log(next);
 };

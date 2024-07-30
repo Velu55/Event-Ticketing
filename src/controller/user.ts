@@ -35,8 +35,9 @@ const userController = {
         );
       }
       return res.status(200).json({
+        success: true,
         message: "Events Found..!",
-        data: event,
+        data: JSON.stringify(event),
       });
     } catch (error) {
       next(error);
@@ -54,8 +55,9 @@ const userController = {
         );
       }
       return res.status(200).json({
+        success: true,
         message: "Event Fetched Sucessfully...!",
-        data: event,
+        data: JSON.stringify(event),
       });
     } catch (error) {
       next(error);
@@ -73,8 +75,9 @@ const userController = {
         );
       }
       return res.status(200).json({
+        success: true,
         message: "Cart Fetched Sucessfully...!",
-        data: cart,
+        data: JSON.stringify(cart),
       });
     } catch (error) {
       next(error);
@@ -112,7 +115,9 @@ const userController = {
       });
       const result = await cart.save();
       return res.status(200).json({
+        success: true,
         message: "Cart Added Sucessfully...!",
+        data: {},
         cart_id: result._id,
       });
     } catch (error) {
@@ -162,8 +167,9 @@ const userController = {
         cart.items[indexToUpdate].quantity = quantity;
         const result = await cart.save();
         return res.status(200).json({
+          success: true,
           message: "Item Updated Sucessfully...!",
-          data: result,
+          data: JSON.stringify(result),
         });
       }
     } catch (error) {
@@ -197,8 +203,9 @@ const userController = {
         cart.items.splice(indexToDelete, 1);
         const result = await cart.save();
         return res.status(200).json({
+          success: true,
           message: "Item Deleted Sucessfully...!",
-          data: result,
+          data: JSON.stringify(result),
         });
       } else {
         throw new NotFound(
@@ -386,7 +393,9 @@ const userController = {
         }
       });
       return res.status(200).json({
+        success: true,
         message: "Order Placed Sucessfully...!",
+        data: {},
         orderId: result._id,
       });
     } catch (error) {
@@ -421,8 +430,9 @@ const userController = {
       let qrCode = await toDataURL(JSON.stringify(eventData));
       qrCode = qrCode.replace(/\\/g, "");
       return res.status(200).json({
+        success: true,
         message: "Order Fetched Sucessfully...!",
-        data: result,
+        data: JSON.stringify(result),
         qrcode: `<img src="${qrCode}" alt="Event QR Code">`,
       });
     } catch (error) {
@@ -452,7 +462,9 @@ const userController = {
       order.orderStatus = "Canceled";
       await order.save();
       return res.status(200).json({
+        success: true,
         message: "Order Canceled Sucessfully...!",
+        data: {},
       });
     } catch (error) {
       next(error);

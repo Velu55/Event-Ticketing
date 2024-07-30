@@ -33,7 +33,9 @@ const authController = {
       });
       const result = await user.save();
       res.status(200).json({
+        success: true,
         message: "User Creaetd",
+        data: {},
         id: result._id,
       });
     } catch (error) {
@@ -80,7 +82,9 @@ const authController = {
           { expiresIn: exp }
         );
         return res.status(200).json({
+          success: true,
           message: "Logged In sucessfully",
+          data: {},
           token: token,
           id: user._id.toString(),
         });

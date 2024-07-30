@@ -37,8 +37,9 @@ const adminController = {
       });
       const result = await event.save();
       return res.status(200).json({
-        message: "event saved sucessfully..!",
-        result: result,
+        success: true,
+        message: "Event Saved Sucessfully..!",
+        data: JSON.stringify(result),
       });
     } catch (error) {
       next(error);
@@ -81,8 +82,9 @@ const adminController = {
       event.category = category;
       const result = await event.save();
       return res.status(200).json({
-        message: "event  found..!",
-        result: result,
+        success: true,
+        message: "Event Found..!",
+        data: JSON.stringify(result),
       });
     } catch (error) {
       next(error);
@@ -101,8 +103,9 @@ const adminController = {
       }
       const result = await Event.findByIdAndDelete(event_id);
       return res.status(200).json({
+        success: true,
         message: "Event Deleted..!",
-        data: result,
+        data: JSON.stringify(result),
       });
     } catch (error) {
       next(error);
@@ -123,8 +126,9 @@ const adminController = {
       user.role = role;
       const result = await user.save();
       return res.status(200).json({
+        success: true,
         message: "User Role Changed..!",
-        data: result,
+        data: JSON.stringify(result),
       });
     } catch (error) {
       next(error);
