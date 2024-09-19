@@ -52,12 +52,12 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
             # Pull the latest image
-            docker pull ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
             
             # Stop and remove the old container if it exists
-            docker stop event_ticket_container || true
-            docker rm event_ticket_container || true
+            sudo docker stop event_ticket_container || true
+            sudo docker rm event_ticket_container || true
             
             # Run the new container
-            docker run -d --name event_ticket_container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
+            sudo docker run -d --name event_ticket_container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
           EOF
