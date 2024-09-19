@@ -27,11 +27,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build  \
-          --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} \
-          --build-arg SESSION_SECRECT=${{ secrets.SESSION_SECRECT }} \
-          --build-arg JWT_SECRET=${{ secrets.JWT_SECRET }} \
-          --build-arg JWT_EXPIRY=${{ secrets.JWT_EXPIRY }} \
+          docker build 
           -t ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest .
 
       - name: Push Docker image to Docker Hub
@@ -59,10 +55,19 @@ jobs:
             # Pull the latest image
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
             
+            - name: Create .env file from GitHub Secrets
+        run: |
+          echo "" > .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "PORT=${{ secrets.PORT }}" >> .env
+          echo "SESSION_SECRECT=${{ secrets.SESSION_SECRECT }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "JWT_EXPIRY=${{ secrets.JWT_EXPIRY }}" >> .env
+         
             # Stop and remove the old container if it exists
             sudo docker stop event_ticket_container || true
             sudo docker rm event_ticket_container || true
             
             # Run the new container
-            sudo docker run -d --name event_ticket_container -p 3000:80 ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
+            sudo docker run -d --name event_ticket_container --restart=always --env-file .env -p 3000:80 ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
           EOF

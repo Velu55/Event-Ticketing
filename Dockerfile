@@ -1,18 +1,6 @@
 # Use an official Node.js runtime as a parent image
 FROM node:22
 
-# Define build arguments
-ARG DATABASE_URL
-ARG SESSION_SECRET
-ARG JWT_SECRET
-ARG JWT_EXPIRY
-
-# Set environment variables
-ENV DATABASE_URL=${DATABASE_URL}
-ENV SESSION_SECRET=${SESSION_SECRET}
-ENV JWT_SECRET=${JWT_SECRET}
-ENV JWT_EXPIRY=${JWT_EXPIRY}
-
 # Set the working directory in the container
 WORKDIR /Event_Ticketing
 
