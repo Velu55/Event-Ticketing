@@ -69,4 +69,3 @@ jobs:
             
             # Run the new container
             sudo docker run -d --name event_ticket_container --restart=always --env-file .env -p 3000:80 ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
-          EOF
