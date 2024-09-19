@@ -3,10 +3,10 @@ name: CI/CD Pipeline for EC2
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   build:
@@ -47,8 +47,8 @@ jobs:
 
       - name: Deploy to EC2
         env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}  # Your EC2 public IP or hostname
-          EC2_USER: ${{ secrets.EC2_USER }}  # Your EC2 username (e.g., ec2-user or ubuntu)
+          EC2_HOST: ${{ secrets.EC2_HOST }} # Your EC2 public IP or hostname
+          EC2_USER: ${{ secrets.EC2_USER }} # Your EC2 username (e.g., ec2-user or ubuntu)
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
             # Pull the latest image
