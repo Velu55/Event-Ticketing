@@ -62,11 +62,12 @@ jobs:
           echo "SESSION_SECRECT=${{ secrets.SESSION_SECRECT }}" >> .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
           echo "JWT_EXPIRY=${{ secrets.JWT_EXPIRY }}" >> .env
-      - name: Run Docker Container
+      - name:  Docker Remove Old Container
         run: |
           # Stop and remove the old container if it exists
           sudo docker stop event_ticket_container || true
           sudo docker rm event_ticket_container || true
-
+       - name: Run Docker Container
+         run: |
           # Run the new container
           sudo docker run -d --name event_ticket_container --restart=always --env-file .env -p 3000:80 ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
