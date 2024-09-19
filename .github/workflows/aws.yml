@@ -59,5 +59,5 @@ jobs:
             sudo docker rm event_ticket_container || true
             
             # Run the new container
-            sudo docker run -d --name event_ticket_container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
+            sudo docker run -d --name event_ticket_container -p 3000:80 ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
           EOF
