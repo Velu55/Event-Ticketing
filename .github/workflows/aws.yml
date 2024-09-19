@@ -54,7 +54,7 @@ jobs:
             # Pull the latest image
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest 
 
-            - name: Create .env file from GitHub Secrets
+        - name: Create .env file from GitHub Secrets
         run: |
           echo "" > .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
