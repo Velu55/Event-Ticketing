@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -52,9 +52,9 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
             # Pull the latest image
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest 
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/event_ticket:latest
 
-        - name: Create .env file from GitHub Secrets
+      - name: Create .env file from GitHub Secrets
         run: |
           echo "" > .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
@@ -62,7 +62,7 @@ jobs:
           echo "SESSION_SECRECT=${{ secrets.SESSION_SECRECT }}" >> .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
           echo "JWT_EXPIRY=${{ secrets.JWT_EXPIRY }}" >> .env
-         
+
             # Stop and remove the old container if it exists
             sudo docker stop event_ticket_container || true
             sudo docker rm event_ticket_container || true
